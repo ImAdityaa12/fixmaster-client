@@ -79,11 +79,146 @@
 //   },
 // });
 
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { useThemeColor } from "@/hooks/useThemeColor";
 import { authClient } from "@/lib/auth-client";
-import { Text } from "react-native";
+import { router } from "expo-router";
+import React from "react";
+import {
+  Alert,
+  SafeAreaView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-export default function Index() {
+export default function HomeScreen() {
   const { data: session } = authClient.useSession();
+  const tintColor = useThemeColor({}, "tint");
+  const backgroundColor = useThemeColor({}, "background");
 
-  return <Text>Welcome, {session?.user.name}</Text>;
+  const handleSignOut = async () => {
+    try {
+      await authClient.signOut();
+      router.replace("/(auth)/login");
+    } catch (error) {
+      console.error("Sign out error:", error);
+      Alert.alert("Error", "Failed to sign out. Please try again.");
+    }
+  };
+
+  const confirmSignOut = () => {
+    Alert.alert("Sign Out", "Are you sure you want to sign out?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Sign Out",
+        style: "destructive",
+        onPress: handleSignOut,
+      },
+    ]);
+  };
+
+  return (
+    <SafeAreaView style={[styles.safeArea, { backgroundColor }]}>
+      <ThemedView style={styles.container}>
+        <View style={styles.header}>
+          <ThemedText type="title" style={styles.welcomeTitle}>
+            Welcome Back!
+          </ThemedText>
+          {session?.user?.name && (
+            <ThemedText style={styles.userName}>
+              Hello, {session.user.name}
+            </ThemedText>
+          )}
+          {session?.user?.email && (
+            <ThemedText style={styles.userEmail}>
+              {session.user.email}
+            </ThemedText>
+          )}
+        </View>
+
+        <View style={styles.content}>
+          <ThemedText style={styles.description}>
+            You're successfully signed in to your account.
+          </ThemedText>
+        </View>
+
+        <View style={styles.footer}>
+          <TouchableOpacity
+            style={[styles.signOutButton, { borderColor: tintColor }]}
+            onPress={confirmSignOut}
+          >
+            <ThemedText
+              style={[styles.signOutButtonText, { color: tintColor }]}
+            >
+              Sign Out
+            </ThemedText>
+          </TouchableOpacity>
+        </View>
+      </ThemedView>
+    </SafeAreaView>
+  );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingVertical: 32,
+  },
+  header: {
+    alignItems: "center",
+    marginBottom: 40,
+  },
+  welcomeTitle: {
+    fontSize: 32,
+    fontWeight: "bold",
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  userName: {
+    fontSize: 20,
+    fontWeight: "600",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  userEmail: {
+    fontSize: 16,
+    opacity: 0.7,
+    textAlign: "center",
+  },
+  content: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  description: {
+    fontSize: 16,
+    textAlign: "center",
+    opacity: 0.8,
+    lineHeight: 24,
+  },
+  footer: {
+    paddingTop: 20,
+  },
+  signOutButton: {
+    borderWidth: 2,
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    alignItems: "center",
+    minHeight: 56,
+    justifyContent: "center",
+  },
+  signOutButtonText: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+});
