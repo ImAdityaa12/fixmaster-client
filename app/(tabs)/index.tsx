@@ -1,4 +1,5 @@
 import { authClient } from "@/lib/auth-client";
+import { user } from "@/types/user";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -70,14 +71,15 @@ const services: Service[] = [
 ];
 
 export default function HomeScreen() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<user | undefined>(undefined);
   const [loading, setLoading] = useState(true);
-
+  // const [services, setService] = useState<Service>();
   useEffect(() => {
     const getUser = async () => {
       try {
         const session = await authClient.getSession();
         setUser(session.data?.user);
+        getServices();
       } catch (error) {
         console.error("Error getting user:", error);
       } finally {
@@ -87,7 +89,19 @@ export default function HomeScreen() {
 
     getUser();
   }, []);
-
+  const getServices = async () => {
+    try {
+      const response = await fetch(
+        `http://192.168.60.240:5000/customer/categories`
+      );
+      const data = await response.json();
+      // setService(data);
+    } catch (error) {
+      console.error("Error getting user:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
   const handleLogout = async () => {
     Alert.alert("Logout", "Are you sure you want to logout?", [
       { text: "Cancel", style: "cancel" },
@@ -195,13 +209,15 @@ export default function HomeScreen() {
         {/* Services Section */}
         <View style={styles.servicesSection}>
           <Text style={styles.sectionTitle}>Our Services</Text>
-          <FlatList
-            data={services}
-            renderItem={renderServiceCard}
-            keyExtractor={(item) => item.id}
-            scrollEnabled={false}
-            showsVerticalScrollIndicator={false}
-          />
+          {services && (
+            <FlatList
+              data={services}
+              renderItem={renderServiceCard}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false}
+              showsVerticalScrollIndicator={false}
+            />
+          )}
         </View>
 
         {/* Emergency Contact */}
