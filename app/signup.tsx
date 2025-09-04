@@ -39,11 +39,14 @@ export default function SignupScreen() {
 
     setLoading(true);
     try {
+      console.log("Attempting signup with:", { email, name: fullName });
       const result = await authClient.signUp.email({
         email,
         password,
         name: fullName,
       });
+
+      console.log("Signup result:", result);
 
       if (result.data) {
         Alert.alert(
@@ -57,10 +60,18 @@ export default function SignupScreen() {
           ]
         );
       } else {
-        Alert.alert("Error", "Failed to create account");
+        console.log("Signup failed - no data returned");
+        const errorMessage =
+          result.error?.message || "Failed to create account";
+        Alert.alert("Error", errorMessage);
       }
     } catch (error) {
-      Alert.alert("Error", "Signup failed. Please try again.");
+      console.error("Signup error:", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Signup failed. Please try again.";
+      Alert.alert("Error", errorMessage);
     } finally {
       setLoading(false);
     }

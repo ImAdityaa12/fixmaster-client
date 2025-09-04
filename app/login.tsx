@@ -27,18 +27,29 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      console.log("I ran");
+      console.log("Attempting login with:", { email });
       const result = await authClient.signIn.email({
         email,
         password,
       });
+
+      console.log("Login result:", result);
+
       if (result.data) {
+        console.log("Login successful, redirecting...");
         router.replace("/(tabs)");
       } else {
-        Alert.alert("Error", "Invalid credentials");
+        console.log("Login failed - no data returned");
+        const errorMessage = result.error?.message || "Invalid credentials";
+        Alert.alert("Error", errorMessage);
       }
     } catch (error) {
-      Alert.alert("Error", "Login failed. Please try again.");
+      console.error("Login error:", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Login failed. Please try again.";
+      Alert.alert("Error", errorMessage);
     } finally {
       setLoading(false);
     }
