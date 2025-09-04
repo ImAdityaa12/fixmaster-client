@@ -1,5 +1,5 @@
 import { Link, router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -20,6 +20,21 @@ export default function SignupScreen() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const session = await authClient.getSession();
+        if (session.data) {
+          router.replace("/(tabs)");
+        }
+      } catch (error) {
+        console.log("Auth check error:", error);
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   const handleSignup = async () => {
     if (!fullName || !email || !password || !confirmPassword) {
