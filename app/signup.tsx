@@ -1,3 +1,4 @@
+import { userCreate } from "@/types/user";
 import { Link, router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -19,6 +20,9 @@ export default function SignupScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [city, setCity] = useState("");
+  const [pincode, setPincode] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -37,7 +41,15 @@ export default function SignupScreen() {
   }, []);
 
   const handleSignup = async () => {
-    if (!fullName || !email || !password || !confirmPassword) {
+    if (
+      !fullName ||
+      !email ||
+      !password ||
+      !confirmPassword ||
+      !phoneNumber ||
+      !city ||
+      !pincode
+    ) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
@@ -54,12 +66,14 @@ export default function SignupScreen() {
 
     setLoading(true);
     try {
-      console.log("Attempting signup with:", { email, name: fullName });
       const result = await authClient.signUp.email({
         email,
         password,
         name: fullName,
-      });
+        phoneNumber,
+        city,
+        pincode: Number(pincode),
+      } as userCreate);
 
       console.log("Signup result:", result);
 
@@ -137,6 +151,47 @@ export default function SignupScreen() {
                   keyboardType="email-address"
                   autoCapitalize="none"
                   autoComplete="email"
+                />
+              </View>
+
+              {/* Phone Number Input */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Phone Number</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your phone number"
+                  placeholderTextColor="#9CA3AF"
+                  value={phoneNumber}
+                  onChangeText={setPhoneNumber}
+                  keyboardType="phone-pad"
+                  autoComplete="tel"
+                />
+              </View>
+
+              {/* City Input */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>City</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your city"
+                  placeholderTextColor="#9CA3AF"
+                  value={city}
+                  onChangeText={setCity}
+                  autoCapitalize="words"
+                />
+              </View>
+
+              {/* Pincode Input */}
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Pincode</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your pincode"
+                  placeholderTextColor="#9CA3AF"
+                  value={pincode}
+                  onChangeText={setPincode}
+                  keyboardType="numeric"
+                  maxLength={6}
                 />
               </View>
 
